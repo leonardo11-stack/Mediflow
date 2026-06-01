@@ -1,0 +1,334 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "baba29d5-4eb6-434a-9109-fd210973555d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a4564725-9347-4029-a864-9bfc9725921b",
+      "name": "Webhook",
+      "webhookId": "baba29d5-4eb6-434a-9109-fd210973555d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f762a4c6-8021-4b4c-b7f6-c7bd97c5c9c9",
+              "name": "Nome",
+              "value": "={{ $json.body.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "281d9980-5922-4a74-8c01-633b36fd79a0",
+              "name": "Email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "bed72934-4e62-427c-ac36-81796ee33f13",
+              "name": "Idade",
+              "value": "={{ $json.body.idade }}",
+              "type": "number"
+            },
+            {
+              "id": "e125ce1d-a04a-460b-bfc5-9181cfcffff9",
+              "name": "Sintomas",
+              "value": "={{ $json.body.sintomas }}",
+              "type": "string"
+            },
+            {
+              "id": "183d189e-0432-4f42-b081-9858d97b56f7",
+              "name": "Observações",
+              "value": "={{ $json.body.observacoes }}",
+              "type": "string"
+            },
+            {
+              "id": "9aa428d1-d188-4ad1-84e8-de3d65a93108",
+              "name": "Prioridade",
+              "value": "={{ $json.body.prioridade }}",
+              "type": "string"
+            },
+            {
+              "id": "e7b30e80-2330-469b-9b2f-7866cbde2941",
+              "name": "Resumo Clinico",
+              "value": "={{ $json.body.resumo_clinico }}",
+              "type": "string"
+            },
+            {
+              "id": "7f321a00-2dab-478c-a811-a214a30fe9da",
+              "name": "Possiveis Causas",
+              "value": "={{ $json.body.possiveis_causas }}",
+              "type": "array"
+            },
+            {
+              "id": "0a33a5ad-b021-4a5a-a32e-f300820a04b1",
+              "name": "Medicamentos Iniciais ",
+              "value": "={{ $json.body.medicamentos_iniciais }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        0
+      ],
+      "id": "5f8ec9b1-0c62-4bc4-b31e-f56b5471c7ea",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Garantir que os campos sejam listas, mesmo que a IA retorne algo vazio\nfor (const item of items) {\n  item.json.body.possiveis_causas = Array.isArray(item.json.body.possiveis_causas) \n    ? item.json.body.possiveis_causas \n    : [item.json.body.possiveis_causas];\n\n  item.json.body.medicamentos_iniciais = Array.isArray(item.json.body.medicamentos_iniciais) \n    ? item.json.body.medicamentos_iniciais \n    : [item.json.body.medicamentos_iniciais];\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "bb546d80-037b-4b39-9696-43ec13c9cc76",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fromEmail": "leozinamaia11@gmail.com",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "=\"Resultado da sua Triagem - {{ $json.Nome }}\"",
+        "html": "=<p>Olá, <strong>{{ $json.Nome }}</strong>, tudo bem?</p>\n\n<p>Com base nas informações enviadas, aqui está o resumo da sua triagem:</p>\n\n<p><strong>Resumo Clínico:</strong><br>\n</p>\n\n{{ $json['Resumo Clinico'] }}<p><strong>Sugestão de Medicamentos:</strong><br>\n{{ $json['Medicamentos Iniciais '] }}</p>\n\n<p><em>Atenção: Estas são sugestões baseadas na sua triagem inicial e não substituem uma consulta médica. Em caso de sintomas graves, procure uma unidade de saúde imediatamente.</em></p>\n\n<p>Atenciosamente,<br>\nSua Assistência Virtual</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        0
+      ],
+      "id": "154d5e0c-e510-4d36-9fab-fb54b8d2accf",
+      "name": "Send an Email",
+      "webhookId": "e41297ea-6acb-42d9-8b3f-8be9af7cda5c",
+      "credentials": {
+        "smtp": {
+          "id": "LiCMmgKTxHwQKW0Y",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:\"Resultado da sua Triagem\""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        48,
+        208
+      ],
+      "id": "fa6a63fb-c927-4f81-9336-cd2a196411c4",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5DQrf8wSIbbPqDNH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1AWA6T8SkqC4YsqKRW6nSQ5kATl70Ec4OIOLmWE7U62Y",
+          "mode": "list",
+          "cachedResultName": "N8N-MEDI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AWA6T8SkqC4YsqKRW6nSQ5kATl70Ec4OIOLmWE7U62Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AWA6T8SkqC4YsqKRW6nSQ5kATl70Ec4OIOLmWE7U62Y/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.From.split('<')[1].replace('>', '') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        208
+      ],
+      "id": "b546432c-4394-4f1f-9632-47fb3fa44003",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FnT53IbB7AIBtfft",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=\"Você é um assistente médico atencioso. O paciente se chama {{ $json.Nome }}. O histórico dele é: '{{ $json.Historico_Triagem }}'. A mensagem recente que ele enviou é: '{{ $('Gmail Trigger').item.json.snippet }}'. Responda a ele com base nessas informações, sendo profissional e prestativo.\""
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        208
+      ],
+      "id": "67552a4c-47d9-44df-a863-f63a91b155a9",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "phpuokYhx0Afn5Rs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        208
+      ],
+      "id": "e24a5a3a-2890-45f2-a4d0-b81fc7c0bbc0",
+      "name": "Reply to a message",
+      "webhookId": "d33f1c27-ba10-45ec-b87f-faf19fa9ef8c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5DQrf8wSIbbPqDNH",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b44cd3aa-1f7a-4e6b-bb73-713ad5a2addb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f487b3fcde40ee2eb9beb0086e6e026a961dd839750724e3d47f4714278550a3"
+  },
+  "id": "wDELZ184iTx2TxPF",
+  "tags": []
+}
